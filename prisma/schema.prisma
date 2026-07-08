@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Download {
+  id            String    @id @default(cuid())
+  url           String    @db.Text
+  quality       String
+  format        String
+  status        Status    @default(PENDING)
+  progress      Int       @default(0)
+  jobId         String?   @unique
+  filePath      String?
+  filename      String?
+  fileSize      Float?
+  error         String?   @db.Text
+  retryCount    Int       @default(0)
+  maxRetries    Int       @default(3)
+  priority      Int       @default(0)
+  userId        String?
+  sessionId     String?
+  metadata      Json?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  history       DownloadHistory[]
+  auditLogs     AuditLog[]
+
+  @@unique([url, quality])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([jobId])
+}
+
+model DownloadHistory {
+  id          String    @id @default(cuid())
+  downloadId  String
+  download    Download  @relation(fields: [downloadId], references: [id], onDelete: Cascade)
+  status      Status
+  progress    Int
+  error       String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  @@index([downloadId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  downloadId  String
+  download    Download  @relation(fields: [downloadId], references: [id], onDelete: Cascade)
+  action      String
+  details     Json?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([downloadId])
+  @@index([createdAt])
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  password    String?
+  role        String    @default("USER")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  downloads   Download[]
+}
+
+enum Status {
+  PENDING
+  PROCESSING
+  DOWNLOADING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

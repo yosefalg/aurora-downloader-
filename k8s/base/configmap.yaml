@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aurora-config
+  namespace: aurora
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  METRICS_ENABLED: "true"
+  METRICS_PATH: "/metrics"
+  RATE_LIMIT_REQUESTS: "30"
+  RATE_LIMIT_WINDOW: "60000"
+  DOWNLOAD_MAX_PARALLEL: "4"
+  DOWNLOAD_MAX_RETRIES: "3"
+  DOWNLOAD_TIMEOUT: "1800000"
+  CLEANUP_INTERVAL: "86400000"
+  FILE_MAX_AGE: "604800000"
+  MAX_DOWNLOAD_SIZE: "10737418240"
+  MAX_QUEUE_SIZE: "10000"
